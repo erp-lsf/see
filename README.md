@@ -14,5 +14,5 @@ This project uses [musl-gcc](https://www.musl-libc.org/), based on personal
  build on [glibc](https://www.gnu.org/software/libc/).
 
 To build project, create and enter `build` directory and run command 
- `cmake .. -GNinja` (I use Ninja build tool). After that, `ninja` command run
+ `cmake .. -GNinja` (I use [Ninja](https://ninja-build.org/) build tool). After that, `ninja` command run
  in the same directory will compile all changed files.
