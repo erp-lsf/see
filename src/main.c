@@ -11,59 +11,59 @@
 
 #define PORTNUM 2300
 #define BUF_SIZE 1024
-#define STARTING_AR_SIZE 1
+#define STARTING_AR_SIZE 2
 #define AR_INCREASE_COEF 2
 
-int split_string(char* string, char* delimiters, char** splits) {
-  int splits_pos = 0;
-  int splits_size = STARTING_AR_SIZE;
-  int capture_length = 0;
+int split_string(char *string, char *delimiters, char ***splits) {
+    int splits_pos = 0;
+    int splits_size = STARTING_AR_SIZE;
 
-  // splits = realloc(splits, sizeof(char*) * splits_size);
-  char *capture;
-  capture = strtok(string, delimiters);
+    *splits = realloc(*splits, sizeof(*splits) * splits_size);
+    char *capture;
+    capture = strtok(string, delimiters);
 
-  if(capture != NULL) {
-    capture_length = strlen(capture);
-    splits[splits_pos] = malloc((capture_length + 1) * sizeof(char));
-    strncpy(splits[splits_pos], capture, capture_length + 1);
-    splits_pos++;
+    if (capture != NULL) {
+        (*splits)[splits_pos] = strdup(capture);
+        splits_pos++;
 
-    while((capture = strtok(NULL, delimiters)) != NULL) {
-      capture_length = strlen(capture);
-      splits[splits_pos] = malloc((capture_length + 1) * sizeof(char));
-      strncpy(splits[splits_pos], capture, capture_length + 1);
-      splits_pos++;
+        capture = strtok(NULL, delimiters);
+        while (capture != NULL) {
+            if (splits_pos == splits_size) {
+                //printf("Grow array up\n");
+                *splits = realloc(*splits, sizeof(*splits) * splits_size * AR_INCREASE_COEF);
+                splits_size = splits_size * AR_INCREASE_COEF;
+                //printf("Size after: %d\n", splits_size);
+            }
 
-      if(splits_pos == splits_size) {
-        printf("Grow array up\n");
-        *splits = realloc(*splits, sizeof(char*) * splits_size * AR_INCREASE_COEF);
-        splits_size = splits_size * AR_INCREASE_COEF;
-        printf("Splits pos: %d\n", splits_pos);
-        printf("Splits size after: %d\n", splits_size);
-      }
+            //printf("Splits pos at start of cycle: %d\n", splits_pos);
+            (*splits)[splits_pos] = strdup(capture);
+            splits_pos++;
+            //printf("Splits pos at end of cycle: %d\n", splits_pos);
+            //printf("Size at the end of the cycle: %d\n", splits_size);
+
+            capture = strtok(NULL, delimiters);
+        }
     }
-  }
 
-  *splits = realloc(*splits, sizeof(char*) * splits_pos);
+    *splits = realloc(*splits, sizeof(*splits) * splits_pos);
 
-  return splits_pos;
+    return splits_pos;
 }
 
-int main(int argc, char *argv[]) {
-  char** splits = malloc(sizeof(char*) * STARTING_AR_SIZE);
-  char string[] = "Hello!\nI want to see the beautiful world\nthree strings";
 
-  int count = split_string(string, "\n", splits);
-  //printf("Count %d\n", count);
+int main(int argc, char *argv[]) {
+    char **splits = NULL;
+    char string[] = "1 string\n2 string\n3 string\n4 string\n5 string\n6 string\n7 string\n8 string";
+    char *delimiters = "\n";
+    int count = split_string(string, delimiters, &splits);
+
+    printf("Count %d\n", count);
 //  assert(count == 3);
- for(int i=0; i<count; i++) {
-    printf("String %d: ", i);
-    printf(splits[i]);
-    printf("\n");
- free(splits[i]);
- } 
-  free(splits);
+    for (int i = 0; i < count; i++) {
+        printf("String %d: \"%s\"\n", i, splits[i]);
+        free(splits[i]);
+    }
+    free(splits);
 }
 
 /*
